@@ -1,6 +1,6 @@
 ---
 name: branches
-description: Audit local branches, remote branches and git worktrees that aren't merged into development, and recommend merge, keep or delete for each. Cleans up only after the user confirms.
+description: Audit local branches, remote branches and git worktrees that aren't merged into development (or staging), and recommend merge, keep or delete for each. Cleans up only after the user confirms.
 argument-hint: "[repo path(s)]"
 disable-model-invocation: true
 ---
@@ -9,19 +9,21 @@ disable-model-invocation: true
 
 Audit the current repo (or the repos given, or the current repo plus its siblings from `AGENTS.md` if the user asks for all).
 
+**Base branch:** `development` if the repo has it, otherwise `staging`. If neither exists, ask. Below, `<base>` means this.
+
 ## 1. Gather
 
 ```bash
 git fetch --all --prune
 git worktree list --porcelain
 git branch -vv
-git branch -r --no-merged origin/development
+git branch -r --no-merged origin/<base>
 ```
 
-For every local branch, remote branch and worktree not merged into `origin/development` (if there's no `development` branch, ask which base to compare against), collect:
+For every local branch, remote branch and worktree not merged into `origin/<base>`, collect:
 
-- commits ahead / behind `origin/development` and the last commit date and author
-- whether its changes are already in `development` another way (squash-merged): check `gh pr list --head <branch> --state all` and `git cherry origin/development <branch>`
+- commits ahead / behind `origin/<base>` and the last commit date and author
+- whether its changes are already in `<base>` another way (squash-merged): check `gh pr list --head <branch> --state all` and `git cherry origin/<base> <branch>`
 - PR state (open, merged, closed, none)
 - for worktrees: path, branch, and uncommitted or untracked changes (`git -C <path> status --short`)
 - a one-line summary of what the branch does
@@ -35,7 +37,7 @@ A table per repo:
 
 Recommendations:
 - **delete** — merged (including squash-merged), PR closed and abandoned, or empty
-- **merge** — finished, still relevant, should go into `development` (say whether it needs a PR or rebase first)
+- **merge** — finished, still relevant, should go into `<base>` (say whether it needs a PR or rebase first)
 - **keep** — work in progress
 - **ask** — unclear, or a worktree with uncommitted changes
 

@@ -1,6 +1,6 @@
 ---
 name: calda-mode
-description: Take an instruction or a Linear ticket, decide whether it is a bug, feature, change or question, and drive it end to end — reproduce, build, verify, review and open PRs to development in every repo touched.
+description: Take an instruction or a Linear ticket, decide whether it is a bug, feature, change or question, and drive it end to end — reproduce, build, verify, review and open PRs to development (or staging) in every repo touched, keeping the ticket updated.
 argument-hint: <instruction or Linear ticket id/url>
 disable-model-invocation: true
 ---
@@ -14,6 +14,7 @@ You get one input: free-form instructions, a Linear ticket (id like `ABC-123` or
 1. If the input names a Linear ticket, fetch it (title, description, comments, attachments) with the Linear tools. If Linear isn't connected, ask the user to paste the ticket.
 2. Read the current repo's `AGENTS.md` (or `CLAUDE.md`). It holds the commands, how to run tests, and the **sibling repos** (backend / web / mobile). Read a sibling's `AGENTS.md` only when the work reaches into it.
 3. Look at the relevant code before deciding anything. If the ticket is already partly or fully done in code, say so and stop to confirm what's left.
+4. **Base branch:** `development` if the repo has it, otherwise `staging`. If neither exists, ask. "Base branch" below means this.
 
 ## 1. Classify
 
@@ -33,7 +34,7 @@ Then create a todo list from the steps of that type's route below.
 ## 2. Branch
 
 For bug / feature / change, in every repo you will edit:
-- Start from an up-to-date `development` (`git fetch` and branch from `origin/development`). If the repo has no `development` branch, ask which base to use.
+- Start from the up-to-date base branch (`git fetch`, then branch from `origin/<base>`).
 - Branch name: `fix/…`, `feat/…` or `chore/…`, plus the Linear id if there is one (`fix/abc-123-short-name`).
 - If you're already on a feature branch for this work, stay on it.
 
@@ -73,13 +74,28 @@ Investigate (code, git history, Linear, Sentry, DB as needed) and answer directl
 
 ## 4. Finish (bug / feature / change)
 
-1. **Review.** Spawn one fresh subagent per touched repo with the diff against `origin/development` and the task description — not your reasoning — and ask it to find correctness bugs, missed cases and cross-repo contract mismatches. Fix what's real; note in the summary anything you chose not to fix and why.
-2. **Ship.** Use the `ship` skill to commit, push and open a PR to `development` in **every repo touched**, cross-linked and linked to the Linear ticket.
+1. **Review.** Spawn one fresh subagent per touched repo with the diff against `origin/<base>` and the task description — not your reasoning — and ask it to find correctness bugs, missed cases and cross-repo contract mismatches. Fix what's real; note in the summary anything you chose not to fix and why.
+2. **Ship.** Use the `ship` skill to commit, push and open a PR to the base branch in **every repo touched**, cross-linked and linked to the Linear ticket.
 3. **Summary** to the user, short:
    - type and root cause (bugs) or what was built
    - how it was verified (and what wasn't)
    - PR links, one per repo
    - anything left for the user to do (run a migration, backfill, set an env var)
+
+## Keeping the Linear ticket updated
+
+Only when a ticket was given. Keep comments short and factual — they're for the team, not a log of your steps.
+
+| When | Update |
+|---|---|
+| Start of work (after classifying) | Assign to the user if unassigned, move to **In Progress**, comment: type + short plan. |
+| Bug reproduced (or not) | Comment: repro steps and result, or why it can't be reproduced locally. |
+| Root cause found | Comment: the root cause in two or three sentences. |
+| Blocked or waiting on the user | Comment what's blocking. |
+| PRs opened | Comment: PR links per repo + how it was verified; move to **In Review**. |
+| Question answered | Comment the answer if the ticket was a question. |
+
+Use the team's actual status names (look them up); if a status doesn't exist, skip that move. If Linear tools aren't available, skip updates and tell the user at the end.
 
 ## Rules
 
