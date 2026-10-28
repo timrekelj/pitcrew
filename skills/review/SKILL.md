@@ -58,7 +58,7 @@ Measure the paths the change touched — don't profile the whole app. Where it's
 
 **Mobile (iOS simulator)**
 - Drive the changed flow the same way each time with its `.maestro/` flow (`maestro test <flow>`) when Maestro is installed.
-- CPU profile of the app while the flow runs: `xcrun xctrace record --template 'Time Profiler' --device booted --attach <app process name> --time-limit 20s --output /tmp/app.trace`, then `xcrun xctrace export --input /tmp/app.trace --toc` and export the time-profile table to read the heaviest stacks.
+- CPU profile of the app while the flow runs: get the booted simulator's UDID (`xcrun simctl list devices booted`), then `xcrun xctrace record --template 'Time Profiler' --device <UDID> --attach <app process name> --time-limit 20s --output /tmp/app.trace`, then `xcrun xctrace export --input /tmp/app.trace --toc` and export the time-profile table to read the heaviest stacks.
 - Metro / app logs for repeated renders or effects firing in a loop; count network calls the screen makes on mount.
 - Treat simulator numbers as relative (base vs. branch), not absolute device performance.
 
