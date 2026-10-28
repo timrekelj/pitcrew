@@ -1,11 +1,11 @@
 {
-  "name": "cstack",
+  "name": "tstack",
   "owner": { "name": "Calda" },
   "plugins": [
     {
-      "name": "cstack",
+      "name": "tstack",
       "source": "./",
-      "description": "Calda stack: a small set of skills for how we build, fix and ship across our project repos."
+      "description": "Tim stack: a small set of skills for how we build, fix and ship across our project repos."
     }
   ]
 }
