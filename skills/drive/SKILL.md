@@ -1,11 +1,11 @@
 ---
-name: calda-mode
+name: drive
 description: Take an instruction or a Linear ticket, decide whether it is a bug, feature, change or question, and drive it end to end — reproduce, build, verify, review and open PRs to development (or staging) in every repo touched, keeping the ticket updated.
 argument-hint: <instruction or Linear ticket id/url>
 disable-model-invocation: true
 ---
 
-# calda-mode
+# drive
 
 You get one input: free-form instructions, a Linear ticket (id like `ABC-123` or a URL), or both. Drive it to a finished, reviewed PR — or, for a question, to a clear answer.
 

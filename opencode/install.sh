@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Links the tstack skills and slash commands into OpenCode's global config.
+# Links the pitcrew skills and slash commands into OpenCode's global config.
 # Re-run after adding or renaming a skill; a `git pull` in this repo is enough otherwise.
 set -euo pipefail
 

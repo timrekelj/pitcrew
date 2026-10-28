@@ -127,5 +127,5 @@ Severity: **blocker** (wrong behavior, data loss, security), **should fix** (bug
 
 ## 6. Fixing
 
-- Called from `calda-mode`: fix blockers and should-fixes, then re-run the affected parts of steps 1–4. Mention nits you skipped.
+- Called from `drive`: fix blockers and should-fixes, then re-run the affected parts of steps 1–4. Mention nits you skipped.
 - Called directly: report, then ask which findings to fix.

@@ -1,33 +1,33 @@
-# tstack
+# pitcrew
 
-Tim stack: a small set of Claude Code, Codex and OpenCode skills for how we build, fix and ship across our project repos (backend / web / mobile).
+A small set of Claude Code, Codex and OpenCode skills for how we build, fix and ship across our project repos (backend / web / mobile).
 
 ## Skills
 
-In Claude Code call them as `/tstack:<name>`; in Codex as `$<name>` (e.g. `$calda-mode fix ABC-123`); in OpenCode as `/tstack-<name>` (e.g. `/tstack-calda-mode ABC-123`).
+In Claude Code call them as `/pitcrew:<name>`; in Codex as `$<name>` (e.g. `$drive fix ABC-123`); in OpenCode as `/pitcrew-<name>` (e.g. `/pitcrew-drive ABC-123`).
 
 | Skill | What it does |
 |---|---|
-| `/tstack:calda-mode <instructions or Linear ticket>` | Decides if it's a bug, feature, change or question, then drives it end to end. Builds to Figma designs when they're linked. Bugs are reproduced locally and re-verified until fixed. Keeps the Linear ticket updated along the way. Finishes with a review and PRs in every repo touched. |
-| `/tstack:review` | Runs the change locally (backend + Supabase, web, iOS simulator), checks it works and matches any linked Figma designs, measures how fast the changed paths are, and reviews the code for bugs, dead code and bad code. Also the last step of `calda-mode`. |
-| `/tstack:ship` | Commit, push and open PRs in every repo with related changes, cross-linked to each other, the Linear ticket and any Figma frames. |
-| `/tstack:branches` | Audit branches and worktrees not merged into the base branch, recommend merge / keep / delete, and clean up after you confirm. |
+| `/pitcrew:drive <instructions or Linear ticket>` | Decides if it's a bug, feature, change or question, then drives it end to end. Builds to Figma designs when they're linked. Bugs are reproduced locally and re-verified until fixed. Keeps the Linear ticket updated along the way. Finishes with a review and PRs in every repo touched. |
+| `/pitcrew:review` | Runs the change locally (backend + Supabase, web, iOS simulator), checks it works and matches any linked Figma designs, measures how fast the changed paths are, and reviews the code for bugs, dead code and bad code. Also the last step of `drive`. |
+| `/pitcrew:ship` | Commit, push and open PRs in every repo with related changes, cross-linked to each other, the Linear ticket and any Figma frames. |
+| `/pitcrew:branches` | Audit branches and worktrees not merged into the base branch, recommend merge / keep / delete, and clean up after you confirm. |
 
 PRs target `development`, or `staging` if a repo has no `development` branch.
 
 ## Usage
 
 ```
-/tstack:calda-mode ABC-123
-/tstack:calda-mode the lounge feed is sorted oldest first, it should be newest first
-/tstack:calda-mode ABC-123 build the new trip card https://www.figma.com/design/<file>?node-id=12-34
-/tstack:review
-/tstack:review 83 focus on the feed query performance
-/tstack:ship ABC-123
-/tstack:branches all repos
+/pitcrew:drive ABC-123
+/pitcrew:drive the lounge feed is sorted oldest first, it should be newest first
+/pitcrew:drive ABC-123 build the new trip card https://www.figma.com/design/<file>?node-id=12-34
+/pitcrew:review
+/pitcrew:review 83 focus on the feed query performance
+/pitcrew:ship ABC-123
+/pitcrew:branches all repos
 ```
 
-How `calda-mode` runs a task:
+How `drive` runs a task:
 
 1. **Context:** reads the Linear ticket, any Figma frames (from the prompt or the ticket) and the repo's `AGENTS.md`; checks whether the work is already done.
 2. **Classify:** bug, feature, change or question. Asks if it's unclear.
@@ -68,22 +68,22 @@ The skills work with whatever is installed and say what they had to skip. For th
 
 Do steps 1 and 2 for each tool you use (Claude Code, Codex, OpenCode). Steps 3 and 4 are shared.
 
-### 1. Install tstack
+### 1. Install pitcrew
 
 **Claude Code**
 
 ```bash
-claude plugin marketplace add timrekelj/tstack
-claude plugin install tstack@tstack
+claude plugin marketplace add timrekelj/pitcrew
+claude plugin install pitcrew@pitcrew
 ```
 
-Or inside Claude Code: `/plugin marketplace add timrekelj/tstack`, then `/plugin install tstack@tstack`. Restart Claude Code.
+Or inside Claude Code: `/plugin marketplace add timrekelj/pitcrew`, then `/plugin install pitcrew@pitcrew`. Restart Claude Code.
 
 **Codex**
 
 ```bash
-codex plugin marketplace add timrekelj/tstack
-codex plugin add tstack@tstack
+codex plugin marketplace add timrekelj/pitcrew
+codex plugin add pitcrew@pitcrew
 ```
 
 Restart Codex.
@@ -93,12 +93,12 @@ Restart Codex.
 OpenCode has no skill marketplace, so clone the repo and link it into `~/.config/opencode`:
 
 ```bash
-git clone https://github.com/timrekelj/tstack ~/.local/share/tstack
-~/.local/share/tstack/opencode/install.sh
+git clone https://github.com/timrekelj/pitcrew ~/.local/share/pitcrew
+~/.local/share/pitcrew/opencode/install.sh
 opencode service restart
 ```
 
-The script symlinks each `skills/<name>` into `~/.config/opencode/skills/` and the `/tstack-*` commands from `opencode/commands/` into `~/.config/opencode/commands/`. It won't overwrite a file or folder that isn't a symlink; it prints `skip` instead (e.g. if you already have a skill called `review`). Use any clone path you like; the links point at it.
+The script symlinks each `skills/<name>` into `~/.config/opencode/skills/` and the `/pitcrew-*` commands from `opencode/commands/` into `~/.config/opencode/commands/`. It won't overwrite a file or folder that isn't a symlink; it prints `skip` instead (e.g. if you already have a skill called `review`). Use any clone path you like; the links point at it.
 
 ### 2. Connect the MCP servers
 
@@ -152,7 +152,7 @@ Each project repo's `AGENTS.md` should say how to run, test and seed it, and lis
 
 ### 5. Try it
 
-In a project repo, run `/tstack:branches` (Claude Code), `$branches` (Codex) or `/tstack-branches` (OpenCode). It only reads until you confirm, so it's a safe first check that the skills are installed and `gh` works.
+In a project repo, run `/pitcrew:branches` (Claude Code), `$branches` (Codex) or `/pitcrew-branches` (OpenCode). It only reads until you confirm, so it's a safe first check that the skills are installed and `gh` works.
 
 ## Updating
 
@@ -165,9 +165,17 @@ Each tool runs an installed copy, not this repo (OpenCode runs your clone).
 
 **Pulling it in**
 
-- Claude Code: `claude plugin marketplace update tstack && claude plugin update tstack@tstack`, then restart. Or turn on auto-update: `/plugin` → Marketplaces → `tstack` → Enable auto-update.
-- Codex: `codex plugin marketplace upgrade tstack && codex plugin add tstack@tstack`, then restart.
-- OpenCode: `git -C ~/.local/share/tstack pull`, then `opencode service restart`. Re-run `opencode/install.sh` if a skill or command was added or renamed.
+- Claude Code: `claude plugin marketplace update pitcrew && claude plugin update pitcrew@pitcrew`, then restart. Or turn on auto-update: `/plugin` → Marketplaces → `pitcrew` → Enable auto-update.
+- Codex: `codex plugin marketplace upgrade pitcrew && codex plugin add pitcrew@pitcrew`, then restart.
+- OpenCode: `git -C ~/.local/share/pitcrew pull`, then `opencode service restart`. Re-run `opencode/install.sh` if a skill or command was added or renamed.
+
+**Migrating from `tstack`**
+
+The repo was renamed from `tstack` and `calda-mode` is now `drive`. Remove the old install, then do [step 1](#1-install-pitcrew) again:
+
+- Claude Code: `claude plugin uninstall tstack@tstack && claude plugin marketplace remove tstack`
+- Codex: `codex plugin remove tstack@tstack && codex plugin marketplace remove tstack`
+- OpenCode: `rm ~/.config/opencode/commands/tstack-*.md ~/.config/opencode/skills/calda-mode`, and point your clone at the new remote: `git -C <clone> remote set-url origin https://github.com/timrekelj/pitcrew`
 
 ## Layout
 
@@ -176,8 +184,8 @@ Each tool runs an installed copy, not this repo (OpenCode runs your clone).
 | `skills/<name>/SKILL.md` | All three |
 | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` | Claude Code |
 | `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json` | Codex |
-| `opencode/install.sh`, `opencode/commands/tstack-<name>.md` | OpenCode |
+| `opencode/install.sh`, `opencode/commands/pitcrew-<name>.md` | OpenCode |
 
-When you add a skill, add a matching `opencode/commands/tstack-<name>.md` that loads it.
+When you add a skill, add a matching `opencode/commands/pitcrew-<name>.md` that loads it.
 
-`argument-hint` in the skill frontmatter is Claude Code-only. `disable-model-invocation` (on `calda-mode` and `branches`) is honoured by Claude Code and OpenCode, so the agent only runs those two when you ask for them. Codex ignores it and may start them on its own when a request matches.
+`argument-hint` in the skill frontmatter is Claude Code-only. `disable-model-invocation` (on `drive` and `branches`) is honoured by Claude Code and OpenCode, so the agent only runs those two when you ask for them. Codex ignores it and may start them on its own when a request matches.
