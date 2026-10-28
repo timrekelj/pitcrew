@@ -10,10 +10,38 @@ In Claude Code call them as `/tstack:<name>`; in Codex as `$<name>` (e.g. `$cald
 |---|---|
 | `/tstack:calda-mode <instructions or Linear ticket>` | Decides if it's a bug, feature, change or question, then drives it end to end. Builds to Figma designs when they're linked. Bugs are reproduced locally and re-verified until fixed. Keeps the Linear ticket updated along the way. Finishes with a review and PRs in every repo touched. |
 | `/tstack:review` | Runs the change locally (backend + Supabase, web, iOS simulator), checks it works and matches any linked Figma designs, measures how fast the changed paths are, and reviews the code for bugs, dead code and bad code. Also the last step of `calda-mode`. |
-| `/tstack:ship` | Commit, push and open cross-linked PRs in every repo with related changes. |
+| `/tstack:ship` | Commit, push and open PRs in every repo with related changes, cross-linked to each other, the Linear ticket and any Figma frames. |
 | `/tstack:branches` | Audit branches and worktrees not merged into the base branch, recommend merge / keep / delete, and clean up after you confirm. |
 
 PRs target `development`, or `staging` if a repo has no `development` branch.
+
+## Usage
+
+```
+/tstack:calda-mode ABC-123
+/tstack:calda-mode the lounge feed is sorted oldest first, it should be newest first
+/tstack:calda-mode ABC-123 build the new trip card https://www.figma.com/design/<file>?node-id=12-34
+/tstack:review
+/tstack:review 83 focus on the feed query performance
+/tstack:ship ABC-123
+/tstack:branches all repos
+```
+
+How `calda-mode` runs a task:
+
+1. **Context:** reads the Linear ticket, any Figma frames (from the prompt or the ticket) and the repo's `AGENTS.md`; checks whether the work is already done.
+2. **Classify:** bug, feature, change or question. Asks if it's unclear.
+3. **Branch** from `development` (or `staging`).
+4. **Do the work:**
+   - bug: reproduce locally, find the root cause, fix, re-run the repro until it passes
+   - feature: plan (waits for your OK on database changes), backend first, then clients, built to the Figma designs
+   - change: refactor / script / data work, dry run first
+   - question: answer with `file:line` references, no PR
+5. **Review** with `review`: runs it, compares with Figma, measures performance, checks code quality; fixes what it finds.
+6. **Ship** with `ship`: PRs in every repo touched.
+7. **Linear** is updated along the way: In Progress → repro / root cause comments → PR links → In Review.
+
+Broad code searches, the code-quality review and multi-repo branch audits run in subagents, so the main agent's context stays focused.
 
 ## Requirements
 
@@ -54,7 +82,7 @@ codex plugin marketplace add timrekelj/tstack
 codex plugin add tstack@tstack
 ```
 
-Restart Codex. Codex has its own MCP config, so add the Linear, Sentry and Chrome DevTools servers from [Requirements](#requirements) too.
+Restart Codex. Codex has its own MCP config, so add the Linear, Sentry, Figma and Chrome DevTools servers from [Requirements](#requirements) too.
 
 ## Updating
 
