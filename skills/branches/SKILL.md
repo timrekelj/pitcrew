@@ -13,6 +13,8 @@ Audit the current repo (or the repos given, or the current repo plus its sibling
 
 ## 1. Gather
 
+When auditing more than one repo, give each repo to its own subagent that runs steps 1–2 and returns only its table; then combine them. For a single repo, do it yourself.
+
 ```bash
 git fetch --all --prune
 git worktree list --porcelain

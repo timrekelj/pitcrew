@@ -14,6 +14,7 @@ Review a change the way a senior engineer would: run it, try it, measure it, the
 2. **Base branch:** `development` if the repo has it, otherwise `staging`.
 3. Per repo, collect `git diff origin/<base>...HEAD` and the intent: the Linear ticket, PR description, or what the user said. Review against the intent, not just the diff.
 4. Read each repo's `AGENTS.md` for how to run, test and seed it.
+5. **Start the code-quality review now** (step 4) as background subagents, one per repo, so it runs while you run and measure the change. Collect their results at step 4.
 
 ## 1. Run it
 
@@ -69,7 +70,7 @@ Report numbers, not impressions, and say which tool produced each one. If you co
 
 ## 4. Code quality
 
-Spawn a fresh subagent per repo. Give it the diff, the intent and the repo's `AGENTS.md` — not your own conclusions — and ask it to find:
+This runs in the background subagents started in step 0 — one per repo, each given the diff, the intent and the repo's `AGENTS.md`, not your own conclusions. Ask each to find:
 
 - **Correctness:** bugs, unhandled errors, race conditions, auth/RLS gaps, missing input validation.
 - **Dead code:** unused functions, exports, components, files, flags, env vars, DB columns; code made unreachable by this change; leftover debug logs or commented-out code. Confirm with `grep` before reporting.
@@ -78,7 +79,7 @@ Spawn a fresh subagent per repo. Give it the diff, the intent and the repo's `AG
 
 Also run the repo's own linters, and these when available: `go vet` / `staticcheck` / `deadcode ./...` (Go), `npx knip` (TS unused files and exports).
 
-Check every finding against the code yourself before reporting it. Drop anything you can't confirm.
+When they finish, merge their findings with anything you noticed while running the change. Check every finding against the code yourself before reporting it. Drop anything you can't confirm.
 
 ## 5. Report
 
