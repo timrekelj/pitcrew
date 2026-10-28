@@ -1,6 +1,6 @@
 {
   "name": "tstack",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Tim stack: a small set of skills for how we build, fix and ship across our project repos.",
   "author": { "name": "Calda" }
 }

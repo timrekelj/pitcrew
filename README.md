@@ -1,10 +1,10 @@
 # tstack
 
-Tim stack: a small set of Claude Code and Codex skills for how we build, fix and ship across our project repos (backend / web / mobile).
+Tim stack: a small set of Claude Code, Codex and OpenCode skills for how we build, fix and ship across our project repos (backend / web / mobile).
 
 ## Skills
 
-In Claude Code call them as `/tstack:<name>`; in Codex as `$<name>` (e.g. `$calda-mode fix ABC-123`).
+In Claude Code call them as `/tstack:<name>`; in Codex as `$<name>` (e.g. `$calda-mode fix ABC-123`); in OpenCode as `/tstack-<name>` (e.g. `/tstack-calda-mode ABC-123`).
 
 | Skill | What it does |
 |---|---|
@@ -47,26 +47,30 @@ Broad code searches, the code-quality review and multi-repo branch audits run in
 
 The skills work with whatever is installed and say what they had to skip. For the full workflow:
 
-| Need | For | Setup |
-|---|---|---|
-| `gh` (logged in) | PRs, branch audit | `brew install gh && gh auth login` |
-| Linear MCP | Reading and updating tickets | Claude Code: connect Linear in claude.ai connector settings. Codex: `codex mcp add linear --url https://mcp.linear.app/mcp` |
-| Docker runtime (running) | Local Supabase for backend runs and reviews | OrbStack or Docker Desktop |
-| Supabase CLI | Local database | `brew install supabase/tap/supabase` |
-| `psql` | `EXPLAIN ANALYZE` on queries | `brew install libpq && brew link --force libpq` |
-| Sentry MCP | Production errors, traces and profiles | Claude Code: connect Sentry in claude.ai connector settings. Codex: `codex mcp add sentry --url https://mcp.sentry.dev/mcp` |
-| Figma MCP | Building to and comparing against Figma designs when a ticket or prompt has Figma links | Claude Code: connect Figma in claude.ai connector settings. Codex: `codex mcp add figma --url https://mcp.figma.com/mcp` |
-| Chrome DevTools MCP | Driving the web app, console errors, performance traces | Claude Code: `claude mcp add -s user chrome-devtools -- npx -y chrome-devtools-mcp@latest`. Codex: `codex mcp add chrome-devtools -- npx -y chrome-devtools-mcp@latest` |
-| Xcode + iOS simulator | Running the mobile app, `xctrace` profiles | Xcode from the App Store |
-| Maestro | Driving the mobile app via `.maestro/` flows | `brew install maestro` (optional) |
-| Go profiling in the API | CPU / memory / goroutine profiles | The backend serves pprof when `PPROF_ADDR=127.0.0.1:6060` and `APP_ENV=local` (see its `AGENTS.md`) |
-| Dead-code tools | Code-quality checks in `review` | `go install honnef.co/go/tools/cmd/staticcheck@latest golang.org/x/tools/cmd/deadcode@latest`; `npx knip` needs no install (optional) |
+| Need | For |
+|---|---|
+| `gh` (logged in) | PRs, branch audit |
+| Linear MCP | Reading and updating tickets |
+| Sentry MCP | Production errors, traces and profiles |
+| Figma MCP | Building to and comparing against Figma designs when a ticket or prompt has Figma links |
+| Chrome DevTools MCP | Driving the web app, console errors, performance traces |
+| Docker runtime (running) | Local Supabase for backend runs and reviews |
+| Supabase CLI | Local database |
+| `psql` | `EXPLAIN ANALYZE` on queries |
+| Xcode + iOS simulator | Running the mobile app, `xctrace` profiles |
+| Maestro (optional) | Driving the mobile app via `.maestro/` flows |
+| Go profiling in the API | CPU / memory / goroutine profiles |
+| Dead-code tools (optional) | Code-quality checks in `review` |
 
-Each repo's `AGENTS.md` should say how to run, test and seed it, and list its sibling repos.
+[Setup](#setup) covers installing all of it.
 
-## Install
+## Setup
 
-### Claude Code
+Do steps 1 and 2 for each tool you use (Claude Code, Codex, OpenCode). Steps 3 and 4 are shared.
+
+### 1. Install tstack
+
+**Claude Code**
 
 ```bash
 claude plugin marketplace add timrekelj/tstack
@@ -75,18 +79,84 @@ claude plugin install tstack@tstack
 
 Or inside Claude Code: `/plugin marketplace add timrekelj/tstack`, then `/plugin install tstack@tstack`. Restart Claude Code.
 
-### Codex
+**Codex**
 
 ```bash
 codex plugin marketplace add timrekelj/tstack
 codex plugin add tstack@tstack
 ```
 
-Restart Codex. Codex has its own MCP config, so add the Linear, Sentry, Figma and Chrome DevTools servers from [Requirements](#requirements) too.
+Restart Codex.
+
+**OpenCode**
+
+OpenCode has no skill marketplace, so clone the repo and link it into `~/.config/opencode`:
+
+```bash
+git clone https://github.com/timrekelj/tstack ~/.local/share/tstack
+~/.local/share/tstack/opencode/install.sh
+opencode service restart
+```
+
+The script symlinks each `skills/<name>` into `~/.config/opencode/skills/` and the `/tstack-*` commands from `opencode/commands/` into `~/.config/opencode/commands/`. It won't overwrite a file or folder that isn't a symlink; it prints `skip` instead (e.g. if you already have a skill called `review`). Use any clone path you like; the links point at it.
+
+### 2. Connect the MCP servers
+
+Each tool keeps its own MCP config. The remote servers ask you to log in the first time.
+
+**Claude Code:** connect **Linear**, **Sentry** and **Figma** in claude.ai → Settings → Connectors (they're shared with Claude Code when you're logged in with that account), then add Chrome DevTools:
+
+```bash
+claude mcp add -s user chrome-devtools -- npx -y chrome-devtools-mcp@latest
+```
+
+**Codex**
+
+```bash
+codex mcp add linear --url https://mcp.linear.app/mcp
+codex mcp add sentry --url https://mcp.sentry.dev/mcp
+codex mcp add figma --url https://mcp.figma.com/mcp
+codex mcp add chrome-devtools -- npx -y chrome-devtools-mcp@latest
+```
+
+**OpenCode**
+
+```bash
+opencode mcp add --global linear --url https://mcp.linear.app/mcp
+opencode mcp add --global sentry --url https://mcp.sentry.dev/mcp
+opencode mcp add --global figma --url https://mcp.figma.com/mcp
+opencode mcp add --global chrome-devtools -- npx -y chrome-devtools-mcp@latest
+opencode mcp auth linear && opencode mcp auth sentry && opencode mcp auth figma
+opencode mcp list   # all four should show as connected
+```
+
+### 3. Install the CLI tools
+
+```bash
+brew install gh supabase/tap/supabase libpq
+brew link --force libpq          # psql
+gh auth login
+brew install maestro             # optional, for .maestro/ mobile flows
+go install honnef.co/go/tools/cmd/staticcheck@latest golang.org/x/tools/cmd/deadcode@latest   # optional
+```
+
+`npx knip` (JS dead code) needs no install. Also needed:
+
+- A Docker runtime, running: OrbStack or Docker Desktop (for local Supabase).
+- Xcode from the App Store, with an iOS simulator (for the mobile app and `xctrace`).
+- Go profiling: the backend serves pprof when `PPROF_ADDR=127.0.0.1:6060` and `APP_ENV=local` (see its `AGENTS.md`).
+
+### 4. Check each repo's `AGENTS.md`
+
+Each project repo's `AGENTS.md` should say how to run, test and seed it, and list its sibling repos (backend / web / mobile). The skills read it first.
+
+### 5. Try it
+
+In a project repo, run `/tstack:branches` (Claude Code), `$branches` (Codex) or `/tstack-branches` (OpenCode). It only reads until you confirm, so it's a safe first check that the skills are installed and `gh` works.
 
 ## Updating
 
-Both tools run an installed copy, not this repo.
+Each tool runs an installed copy, not this repo (OpenCode runs your clone).
 
 **Releasing a change**
 
@@ -97,13 +167,17 @@ Both tools run an installed copy, not this repo.
 
 - Claude Code: `claude plugin marketplace update tstack && claude plugin update tstack@tstack`, then restart. Or turn on auto-update: `/plugin` → Marketplaces → `tstack` → Enable auto-update.
 - Codex: `codex plugin marketplace upgrade tstack && codex plugin add tstack@tstack`, then restart.
+- OpenCode: `git -C ~/.local/share/tstack pull`, then `opencode service restart`. Re-run `opencode/install.sh` if a skill or command was added or renamed.
 
 ## Layout
 
 | Path | Used by |
 |---|---|
-| `skills/<name>/SKILL.md` | Both |
+| `skills/<name>/SKILL.md` | All three |
 | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` | Claude Code |
 | `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json` | Codex |
+| `opencode/install.sh`, `opencode/commands/tstack-<name>.md` | OpenCode |
 
-`disable-model-invocation` and `argument-hint` in the skill frontmatter are Claude Code-only; Codex ignores them, so it may start `calda-mode` or `branches` on its own when a request matches.
+When you add a skill, add a matching `opencode/commands/tstack-<name>.md` that loads it.
+
+`argument-hint` in the skill frontmatter is Claude Code-only. `disable-model-invocation` (on `calda-mode` and `branches`) is honoured by Claude Code and OpenCode, so the agent only runs those two when you ask for them. Codex ignores it and may start them on its own when a request matches.
