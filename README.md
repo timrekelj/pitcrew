@@ -1,8 +1,10 @@
 # tstack
 
-Tim stack: a small set of Claude Code skills for how we build, fix and ship across our project repos (backend / web / mobile).
+Tim stack: a small set of Claude Code and Codex skills for how we build, fix and ship across our project repos (backend / web / mobile).
 
 ## Skills
+
+In Claude Code call them as `/tstack:<name>`; in Codex as `$<name>` (e.g. `$calda-mode fix ABC-123`).
 
 | Skill | What it does |
 |---|---|
@@ -20,12 +22,12 @@ The skills work with whatever is installed and say what they had to skip. For th
 | Need | For | Setup |
 |---|---|---|
 | `gh` (logged in) | PRs, branch audit | `brew install gh && gh auth login` |
-| Linear connector | Reading and updating tickets | Connect Linear in claude.ai connector settings |
+| Linear MCP | Reading and updating tickets | Claude Code: connect Linear in claude.ai connector settings. Codex: `codex mcp add linear --url https://mcp.linear.app/mcp` |
 | Docker runtime (running) | Local Supabase for backend runs and reviews | OrbStack or Docker Desktop |
 | Supabase CLI | Local database | `brew install supabase/tap/supabase` |
 | `psql` | `EXPLAIN ANALYZE` on queries | `brew install libpq && brew link --force libpq` |
-| Sentry connector | Production errors, traces and profiles | Connect Sentry in claude.ai connector settings |
-| Chrome DevTools MCP | Driving the web app, console errors, performance traces | `claude mcp add -s user chrome-devtools -- npx -y chrome-devtools-mcp@latest` |
+| Sentry MCP | Production errors, traces and profiles | Claude Code: connect Sentry in claude.ai connector settings. Codex: `codex mcp add sentry --url https://mcp.sentry.dev/mcp` |
+| Chrome DevTools MCP | Driving the web app, console errors, performance traces | Claude Code: `claude mcp add -s user chrome-devtools -- npx -y chrome-devtools-mcp@latest`. Codex: `codex mcp add chrome-devtools -- npx -y chrome-devtools-mcp@latest` |
 | Xcode + iOS simulator | Running the mobile app, `xctrace` profiles | Xcode from the App Store |
 | Maestro | Driving the mobile app via `.maestro/` flows | `brew install maestro` (optional) |
 | Go profiling in the API | CPU / memory / goroutine profiles | The backend serves pprof when `PPROF_ADDR=127.0.0.1:6060` and `APP_ENV=local` (see its `AGENTS.md`) |
@@ -35,19 +37,44 @@ Each repo's `AGENTS.md` should say how to run, test and seed it, and list its si
 
 ## Install
 
+### Claude Code
+
 ```bash
 claude plugin marketplace add timrekelj/tstack
 claude plugin install tstack@tstack
 ```
 
-Or inside Claude Code: `/plugin marketplace add timrekelj/tstack`, then `/plugin install tstack@tstack`.
+Or inside Claude Code: `/plugin marketplace add timrekelj/tstack`, then `/plugin install tstack@tstack`. Restart Claude Code.
+
+### Codex
+
+```bash
+codex plugin marketplace add timrekelj/tstack
+codex plugin add tstack@tstack
+```
+
+Restart Codex. Codex has its own MCP config, so add the Linear, Sentry and Chrome DevTools servers from [Requirements](#requirements) too.
 
 ## Updating
 
-Claude Code runs an installed copy, not this repo. To pick up changes:
+Both tools run an installed copy, not this repo.
 
-1. Bump `version` in `.claude-plugin/plugin.json`, commit and push.
-2. Run `claude plugin marketplace update tstack && claude plugin update tstack@tstack`.
-3. Restart Claude Code.
+**Releasing a change**
 
-To skip step 2, turn on auto-update: `/plugin` → Marketplaces → `tstack` → Enable auto-update.
+1. Bump `version` in **both** `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` (keep them equal).
+2. Commit and push.
+
+**Pulling it in**
+
+- Claude Code: `claude plugin marketplace update tstack && claude plugin update tstack@tstack`, then restart. Or turn on auto-update: `/plugin` → Marketplaces → `tstack` → Enable auto-update.
+- Codex: `codex plugin marketplace upgrade tstack && codex plugin add tstack@tstack`, then restart.
+
+## Layout
+
+| Path | Used by |
+|---|---|
+| `skills/<name>/SKILL.md` | Both |
+| `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` | Claude Code |
+| `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json` | Codex |
+
+`disable-model-invocation` and `argument-hint` in the skill frontmatter are Claude Code-only; Codex ignores them, so it may start `calda-mode` or `branches` on its own when a request matches.

@@ -14,7 +14,7 @@ You get one input: free-form instructions, a Linear ticket (id like `ABC-123` or
 1. If the input names a Linear ticket, fetch it (title, description, comments, attachments) with the Linear tools. If Linear isn't connected, ask the user to paste the ticket.
 2. Read the current repo's `AGENTS.md` (or `CLAUDE.md`). It holds the commands, how to run tests, and the **sibling repos** (backend / web / mobile). Read a sibling's `AGENTS.md` only when the work reaches into it.
 3. Look at the relevant code before deciding anything. If the ticket is already partly or fully done in code, say so and stop to confirm what's left.
-4. **Broad searches go to a subagent.** When finding something means reading across many files, git history or several repos (where is X computed, who calls it, when did it change), hand that search to an Explore subagent with a specific question and use its conclusion. Keep your own context for the plan, the fix and the repro loop. Look up a single known file or symbol yourself.
+4. **Broad searches go to a subagent.** When finding something means reading across many files, git history or several repos (where is X computed, who calls it, when did it change), hand that search to a read-only search subagent (Explore in Claude Code) with a specific question and use its conclusion. Keep your own context for the plan, the fix and the repro loop. Look up a single known file or symbol yourself.
 5. **Base branch:** `development` if the repo has it, otherwise `staging`. If neither exists, ask. "Base branch" below means this.
 
 ## 1. Classify
