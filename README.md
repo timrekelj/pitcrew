@@ -17,8 +17,18 @@ The skills read each repo's `AGENTS.md` for commands, tests and sibling repos, s
 ## Install
 
 ```bash
-claude plugin marketplace add <path or git url of this repo>
+claude plugin marketplace add timrekelj/tstack
 claude plugin install tstack@tstack
 ```
 
-After pulling changes: `claude plugin marketplace update tstack && claude plugin update tstack@tstack`.
+Or inside Claude Code: `/plugin marketplace add timrekelj/tstack`, then `/plugin install tstack@tstack`.
+
+## Updating
+
+Claude Code runs an installed copy, not this repo. To pick up changes:
+
+1. Bump `version` in `.claude-plugin/plugin.json`, commit and push.
+2. Run `claude plugin marketplace update tstack && claude plugin update tstack@tstack`.
+3. Restart Claude Code.
+
+To skip step 2, turn on auto-update: `/plugin` → Marketplaces → `tstack` → Enable auto-update.
