@@ -13,7 +13,25 @@ Tim stack: a small set of Claude Code skills for how we build, fix and ship acro
 
 PRs target `development`, or `staging` if a repo has no `development` branch.
 
-The skills read each repo's `AGENTS.md` for commands, tests and sibling repos, so keep that file up to date.
+## Requirements
+
+The skills work with whatever is installed and say what they had to skip. For the full workflow:
+
+| Need | For | Setup |
+|---|---|---|
+| `gh` (logged in) | PRs, branch audit | `brew install gh && gh auth login` |
+| Linear connector | Reading and updating tickets | Connect Linear in claude.ai connector settings |
+| Docker runtime (running) | Local Supabase for backend runs and reviews | OrbStack or Docker Desktop |
+| Supabase CLI | Local database | `brew install supabase/tap/supabase` |
+| `psql` | `EXPLAIN ANALYZE` on queries | `brew install libpq && brew link --force libpq` |
+| Sentry connector | Production errors, traces and profiles | Connect Sentry in claude.ai connector settings |
+| Chrome DevTools MCP | Driving the web app, console errors, performance traces | `claude mcp add -s user chrome-devtools -- npx -y chrome-devtools-mcp@latest` |
+| Xcode + iOS simulator | Running the mobile app, `xctrace` profiles | Xcode from the App Store |
+| Maestro | Driving the mobile app via `.maestro/` flows | `brew install maestro` (optional) |
+| Go profiling in the API | CPU / memory / goroutine profiles | The backend serves pprof when `PPROF_ADDR=127.0.0.1:6060` and `APP_ENV=local` (see its `AGENTS.md`) |
+| Dead-code tools | Code-quality checks in `review` | `go install honnef.co/go/tools/cmd/staticcheck@latest golang.org/x/tools/cmd/deadcode@latest`; `npx knip` needs no install (optional) |
+
+Each repo's `AGENTS.md` should say how to run, test and seed it, and list its sibling repos.
 
 ## Install
 
