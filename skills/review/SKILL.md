@@ -12,7 +12,7 @@ Review a change the way a senior engineer would: run it, try it, measure it, the
 
 1. Work out what's being reviewed: the given PR / branch, otherwise the current branch. Include sibling repos (from `AGENTS.md`) that have related changes on a branch.
 2. **Base branch:** `development` if the repo has it, otherwise `staging`.
-3. Per repo, collect `git diff origin/<base>...HEAD` and the intent: the Linear ticket, PR description, or what the user said. Review against the intent, not just the diff.
+3. Per repo, collect `git diff origin/<base>...HEAD` and the intent: the Linear ticket, PR description, or what the user said. Review against the intent, not just the diff. Collect any Figma links from those too.
 4. Read each repo's `AGENTS.md` for how to run, test and seed it.
 5. **Start the code-quality review now** (step 4) as background subagents, one per repo, so it runs while you run and measure the change. Collect their results at step 4.
 
@@ -34,6 +34,24 @@ If something can't run locally (missing env vars, Docker not running, a third-pa
 - For bugs: does the original repro now pass?
 - Do existing tests and checks pass (tests, typecheck, lint, format)?
 - Across repos: do request/response shapes, enum/option values and error handling match on both sides?
+
+### Matches the design? (when there are Figma links and the change touches UI)
+
+For each Figma frame that covers a changed screen:
+
+1. Get the design: a screenshot of the frame (Figma `get_screenshot`) plus its design context and variables (`get_design_context`, `get_variable_defs`) for exact values. Follow the Figma MCP's own instructions.
+2. Get the implementation at the same size and state:
+   - **Web:** Chrome DevTools MCP — `resize_page` to the frame's width and height, navigate to the screen, put it in the same state (data, hover, open menu…), `take_screenshot`. Use `get_css_styles` to read real values where something looks off.
+   - **Mobile:** a simulator close to the frame's device size, drive to the screen (Maestro flow if there is one), `xcrun simctl io booted screenshot`.
+3. Compare them side by side, section by section:
+   - layout and alignment, spacing and sizes
+   - typography (family, size, weight, line height)
+   - colors, borders, radii, shadows — and whether they use the repo's tokens instead of hard-coded values
+   - copy, icons and images
+   - states the design shows (empty, loading, error, disabled, variants) and that they exist in code
+4. Every mismatch becomes a finding with both screenshots referenced and the exact values (design vs. implemented). Ignore differences caused only by test data or font rendering. If a mismatch looks intentional (a platform convention, an existing component that differs slightly), call it out as a question rather than a defect.
+
+Save the screenshot pairs to a temp folder and list their paths in the report.
 
 ## 3. How fast is it?
 
@@ -94,6 +112,9 @@ When they finish, merge their findings with anything you noticed while running t
 ### Works
 <pass/fail per behavior, with evidence>
 
+### Design
+<per Figma frame: matches / mismatches, with screenshot paths; omit without Figma links>
+
 ### Performance
 <numbers, base vs. branch where measured; regressions flagged>
 
@@ -102,7 +123,7 @@ When they finish, merge their findings with anything you noticed while running t
 |---|---|---|---|---|---|
 ```
 
-Severity: **blocker** (wrong behavior, data loss, security), **should fix** (bugs in edge cases, real perf regressions, dead code added by this change), **nit** (style, naming).
+Severity: **blocker** (wrong behavior, data loss, security), **should fix** (bugs in edge cases, real perf regressions, dead code added by this change, visible mismatches with the Figma design), **nit** (style, naming).
 
 ## 6. Fixing
 

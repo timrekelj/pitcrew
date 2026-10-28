@@ -8,8 +8,8 @@ In Claude Code call them as `/tstack:<name>`; in Codex as `$<name>` (e.g. `$cald
 
 | Skill | What it does |
 |---|---|
-| `/tstack:calda-mode <instructions or Linear ticket>` | Decides if it's a bug, feature, change or question, then drives it end to end. Bugs are reproduced locally and re-verified until fixed. Keeps the Linear ticket updated along the way. Finishes with a review and PRs in every repo touched. |
-| `/tstack:review` | Runs the change locally (backend + Supabase, web, iOS simulator), checks it works, measures how fast the changed paths are, and reviews the code for bugs, dead code and bad code. Also the last step of `calda-mode`. |
+| `/tstack:calda-mode <instructions or Linear ticket>` | Decides if it's a bug, feature, change or question, then drives it end to end. Builds to Figma designs when they're linked. Bugs are reproduced locally and re-verified until fixed. Keeps the Linear ticket updated along the way. Finishes with a review and PRs in every repo touched. |
+| `/tstack:review` | Runs the change locally (backend + Supabase, web, iOS simulator), checks it works and matches any linked Figma designs, measures how fast the changed paths are, and reviews the code for bugs, dead code and bad code. Also the last step of `calda-mode`. |
 | `/tstack:ship` | Commit, push and open cross-linked PRs in every repo with related changes. |
 | `/tstack:branches` | Audit branches and worktrees not merged into the base branch, recommend merge / keep / delete, and clean up after you confirm. |
 
@@ -27,6 +27,7 @@ The skills work with whatever is installed and say what they had to skip. For th
 | Supabase CLI | Local database | `brew install supabase/tap/supabase` |
 | `psql` | `EXPLAIN ANALYZE` on queries | `brew install libpq && brew link --force libpq` |
 | Sentry MCP | Production errors, traces and profiles | Claude Code: connect Sentry in claude.ai connector settings. Codex: `codex mcp add sentry --url https://mcp.sentry.dev/mcp` |
+| Figma MCP | Building to and comparing against Figma designs when a ticket or prompt has Figma links | Claude Code: connect Figma in claude.ai connector settings. Codex: `codex mcp add figma --url https://mcp.figma.com/mcp` |
 | Chrome DevTools MCP | Driving the web app, console errors, performance traces | Claude Code: `claude mcp add -s user chrome-devtools -- npx -y chrome-devtools-mcp@latest`. Codex: `codex mcp add chrome-devtools -- npx -y chrome-devtools-mcp@latest` |
 | Xcode + iOS simulator | Running the mobile app, `xctrace` profiles | Xcode from the App Store |
 | Maestro | Driving the mobile app via `.maestro/` flows | `brew install maestro` (optional) |

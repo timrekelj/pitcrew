@@ -13,9 +13,10 @@ You get one input: free-form instructions, a Linear ticket (id like `ABC-123` or
 
 1. If the input names a Linear ticket, fetch it (title, description, comments, attachments) with the Linear tools. If Linear isn't connected, ask the user to paste the ticket.
 2. Read the current repo's `AGENTS.md` (or `CLAUDE.md`). It holds the commands, how to run tests, and the **sibling repos** (backend / web / mobile). Read a sibling's `AGENTS.md` only when the work reaches into it.
-3. Look at the relevant code before deciding anything. If the ticket is already partly or fully done in code, say so and stop to confirm what's left.
-4. **Broad searches go to a subagent.** When finding something means reading across many files, git history or several repos (where is X computed, who calls it, when did it change), hand that search to a read-only search subagent (Explore in Claude Code) with a specific question and use its conclusion. Keep your own context for the plan, the fix and the repro loop. Look up a single known file or symbol yourself.
-5. **Base branch:** `development` if the repo has it, otherwise `staging`. If neither exists, ask. "Base branch" below means this.
+3. **Figma:** collect every Figma link from the input and the ticket (description, comments, attachments). For each, use the Figma tools (follow the Figma MCP's own instructions) to get a screenshot of the frame and its design context — layout, spacing, typography, colors, variables, copy, states. These designs are part of the spec. If a link points at a whole page or file rather than a frame, list the frames and ask which ones apply. If the Figma tools aren't connected, say so and continue without them.
+4. Look at the relevant code before deciding anything. If the ticket is already partly or fully done in code, say so and stop to confirm what's left.
+5. **Broad searches go to a subagent.** When finding something means reading across many files, git history or several repos (where is X computed, who calls it, when did it change), hand that search to a read-only search subagent (Explore in Claude Code) with a specific question and use its conclusion. Keep your own context for the plan, the fix and the repro loop. Look up a single known file or symbol yourself.
+6. **Base branch:** `development` if the repo has it, otherwise `staging`. If neither exists, ask. "Base branch" below means this.
 
 ## 1. Classify
 
@@ -56,7 +57,7 @@ For bug / feature / change, in every repo you will edit:
 
 1. Write a short plan: what changes in which repo, data shape / API contract first, then the code. For anything touching the database (schema, migration, trigger, RLS, backfill), show the plan and wait for the user's OK before writing it.
 2. If the work spans repos, do the backend/API first, then clients against it. Keep contracts and shared values in sync across repos.
-3. Build it. Match the surrounding code; don't add abstractions or comments the codebase doesn't use.
+3. Build it. Match the surrounding code; don't add abstractions or comments the codebase doesn't use. With Figma designs, build to them using the repo's existing components and design tokens (map Figma variables to the existing tokens rather than hard-coding values), and cover the states the designs show (empty, loading, error, variants).
 4. Prove it works: tests where the repo has them, plus actually running the changed path (request, script, simulator, browser) when it's cheap to do.
 5. Run the repo's checks.
 6. → **Finish**.
@@ -75,7 +76,7 @@ Investigate (code, git history, Linear, Sentry, DB as needed) and answer directl
 
 ## 4. Finish (bug / feature / change)
 
-1. **Review.** Run the `review` skill on every touched repo. It runs the change, measures it and reviews the code; fix its blockers and should-fixes and re-run the affected checks. Note in the summary anything you chose not to fix and why.
+1. **Review.** Run the `review` skill on every touched repo, passing along any Figma links. It runs the change, measures it and reviews the code; fix its blockers and should-fixes and re-run the affected checks. Note in the summary anything you chose not to fix and why.
 2. **Ship.** Use the `ship` skill to commit, push and open a PR to the base branch in **every repo touched**, cross-linked and linked to the Linear ticket.
 3. **Summary** to the user, short:
    - type and root cause (bugs) or what was built

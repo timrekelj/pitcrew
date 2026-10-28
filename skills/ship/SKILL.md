@@ -37,6 +37,7 @@ PR body:
 
 ## Related
 - Linear: <ticket link>
+- Figma: <frame links, if any>
 - <links to the sibling PRs>
 
 ## Notes for review / deploy
