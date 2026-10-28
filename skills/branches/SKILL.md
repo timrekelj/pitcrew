@@ -1,0 +1,49 @@
+---
+name: branches
+description: Audit local branches, remote branches and git worktrees that aren't merged into development, and recommend merge, keep or delete for each. Cleans up only after the user confirms.
+argument-hint: "[repo path(s)]"
+disable-model-invocation: true
+---
+
+# branches
+
+Audit the current repo (or the repos given, or the current repo plus its siblings from `AGENTS.md` if the user asks for all).
+
+## 1. Gather
+
+```bash
+git fetch --all --prune
+git worktree list --porcelain
+git branch -vv
+git branch -r --no-merged origin/development
+```
+
+For every local branch, remote branch and worktree not merged into `origin/development` (if there's no `development` branch, ask which base to compare against), collect:
+
+- commits ahead / behind `origin/development` and the last commit date and author
+- whether its changes are already in `development` another way (squash-merged): check `gh pr list --head <branch> --state all` and `git cherry origin/development <branch>`
+- PR state (open, merged, closed, none)
+- for worktrees: path, branch, and uncommitted or untracked changes (`git -C <path> status --short`)
+- a one-line summary of what the branch does
+
+## 2. Recommend
+
+A table per repo:
+
+| Branch / worktree | Ahead / behind | Last commit | PR | Uncommitted | Recommendation | Why |
+|---|---|---|---|---|---|---|
+
+Recommendations:
+- **delete** — merged (including squash-merged), PR closed and abandoned, or empty
+- **merge** — finished, still relevant, should go into `development` (say whether it needs a PR or rebase first)
+- **keep** — work in progress
+- **ask** — unclear, or a worktree with uncommitted changes
+
+## 3. Clean up
+
+Only after the user confirms which ones:
+- worktrees: `git worktree remove <path>` (never `--force` on a worktree with uncommitted changes unless the user says so), then `git worktree prune`
+- local branches: `git branch -d`; use `-D` only for squash-merged branches you've confirmed
+- remote branches: `git push origin --delete <branch>` only if the user explicitly includes remote branches
+
+Report what was removed.

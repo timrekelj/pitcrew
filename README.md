@@ -1,0 +1,22 @@
+# cstack
+
+Calda stack: a small set of Claude Code skills for how we build, fix and ship across our project repos (backend / web / mobile).
+
+## Skills
+
+| Skill | What it does |
+|---|---|
+| `/cstack:calda-mode <instructions or Linear ticket>` | Decides if it's a bug, feature, change or question, then drives it end to end. Bugs are reproduced locally and re-verified until fixed. Finishes with a review and PRs to `development` in every repo touched. |
+| `/cstack:ship` | Commit, push and open cross-linked PRs to `development` in every repo with related changes. |
+| `/cstack:branches` | Audit branches and worktrees not merged into `development`, recommend merge / keep / delete, and clean up after you confirm. |
+
+The skills read each repo's `AGENTS.md` for commands, tests and sibling repos, so keep that file up to date.
+
+## Install
+
+```bash
+claude plugin marketplace add <path or git url of this repo>
+claude plugin install cstack@cstack
+```
+
+After pulling changes: `claude plugin marketplace update cstack && claude plugin update cstack@cstack`.
