@@ -21,8 +21,8 @@ Start only what the change needs, locally. Never point anything at a staging or 
 
 | Repo type | Run | Exercise the change |
 |---|---|---|
-| **Backend** (Go + Supabase) | Local Supabase (`supabase start`, reset/seed per `AGENTS.md`), then the API (`air`, `go run`, or docker compose). Integration tests per `AGENTS.md`. | Call the changed endpoints with `curl` or the Bruno collection: happy path, bad input, wrong user / no auth, empty data. Check responses, status codes, and the rows written. |
-| **Web** (Next.js) | `npm run dev` against the local backend. Use `e2e` tests if present. | Open the changed pages in the browser. Click through the flow; check the browser console and server logs for errors; check loading, empty and error states. |
+| **Backend** (Go + Supabase) | Local Supabase (`supabase start`, reset/seed per `AGENTS.md`), then the API (`air`, `go run`, or docker compose) with `PPROF_ADDR=127.0.0.1:6060` if the repo supports it (see its `AGENTS.md`). Integration tests per `AGENTS.md`. | Call the changed endpoints with `curl` or the Bruno collection: happy path, bad input, wrong user / no auth, empty data. Check responses, status codes, and the rows written. |
+| **Web** (Next.js) | `npm run dev` against the local backend. Use `e2e` tests if present. | Open the changed pages with the **Chrome DevTools MCP** (`new_page` / `navigate_page`, `take_snapshot`, `click` / `fill`). Click through the flow; check `list_console_messages`, failed requests in `list_network_requests`, and server logs; check loading, empty and error states. |
 | **Mobile** (Expo) | `npm run check`, then the app on the iOS simulator (`npx expo run:ios` or the existing dev build) against the local backend. | Run the relevant `.maestro/` flows if Maestro is installed; otherwise drive it and take screenshots (`xcrun simctl io booted screenshot`). Check Metro logs for errors and warnings. |
 
 If something can't run locally (missing env vars, Docker not running, a third-party service), say exactly what's missing and continue with what can run. Never fake a result.
@@ -36,16 +36,36 @@ If something can't run locally (missing env vars, Docker not running, a third-pa
 
 ## 3. How fast is it?
 
-Measure the paths the change touched — don't profile the whole app. Where it's cheap, measure the same thing on the base branch too, so you can call it a regression or not.
+Measure the paths the change touched — don't profile the whole app. Where it's cheap, run the same measurement on the base branch too, so you can call it a regression or not. Use the tools below; if one isn't available, say which and move on.
 
-- **API:** time the changed endpoints (`curl -w '%{time_total}'`, ~20 runs, report p50/p95). Count DB queries per request where you can; flag N+1 patterns.
-- **SQL:** `EXPLAIN (ANALYZE, BUFFERS)` on new or changed queries against local data; flag sequential scans on big tables and missing indexes for new filters/joins.
-- **Go CPU / memory:** if the API exposes pprof locally, take a profile while hitting the endpoint (`go tool pprof -top`, `-traces`). For hot functions, `go test -bench . -cpuprofile`.
-- **Web:** server timing in the logs, number and size of requests, bundle size change (`next build` output), obvious extra re-renders or waterfalls.
-- **Mobile:** time to show the changed screen, list scroll smoothness, extra network calls on mount, re-renders. Use a profiler trace if one is available.
-- **Code-level:** unbounded loops or queries, missing pagination, work done per item that could be done once, things fetched but not used.
+**Production baseline (Sentry).** Before measuring locally, look up the changed endpoints / screens in Sentry: `search_traces` for their p50/p95 duration and slowest spans, `search_profiles` for hot functions, `search_issues` for current errors. This tells you what's already slow in real use and what to watch for. Skip if the Sentry tools aren't connected.
 
-Report numbers, not impressions. If you couldn't measure something, say so.
+**Backend (Go + Postgres)**
+- **Latency:** `curl -s -o /dev/null -w '%{time_total}\n'` against each changed endpoint, ~20 runs after a warm-up; report p50/p95.
+- **CPU / memory / stacks (pprof):** with the API on `PPROF_ADDR`, run the endpoint in a loop while capturing, from `app/`:
+  - `go tool pprof -top -cum 'http://127.0.0.1:6060/debug/pprof/profile?seconds=15'` — where time goes
+  - `go tool pprof -top -sample_index=alloc_space http://127.0.0.1:6060/debug/pprof/heap` — allocations
+  - `curl -s 'http://127.0.0.1:6060/debug/pprof/goroutine?debug=2'` — goroutine stacks; look for leaks or blocking
+  - For a pure function: `go test -run '^$' -bench . -benchmem -cpuprofile /tmp/cpu.out ./<pkg>` then `go tool pprof -top /tmp/cpu.out`
+- **SQL (psql against local Supabase):** for every new or changed query, `EXPLAIN (ANALYZE, BUFFERS)` with realistic parameters. Flag sequential scans on large tables, missing indexes for new filters/joins/sorts, and row-estimate misses. To catch N+1s, reset `pg_stat_statements` (`select pg_stat_statements_reset();`), hit the endpoint once, then read `select calls, mean_exec_time, query from pg_stat_statements order by calls desc limit 20;`.
+
+**Web (Chrome DevTools MCP)**
+- `performance_start_trace` with reload on the changed page (and again while doing the changed interaction), `performance_stop_trace`, then `performance_analyze_insight` on the insights it reports (LCP breakdown, render-blocking, long tasks, layout shifts).
+- `lighthouse_audit` on the changed page for a performance / accessibility / best-practices score.
+- `list_network_requests`: count, size and waterfall of requests the page makes; flag duplicate or sequential fetches that could be parallel.
+- `take_heapsnapshot` before and after repeating the interaction a few times if a leak is plausible.
+- `next build` output: route bundle size versus base.
+
+**Mobile (iOS simulator)**
+- Drive the changed flow the same way each time with its `.maestro/` flow (`maestro test <flow>`) when Maestro is installed.
+- CPU profile of the app while the flow runs: `xcrun xctrace record --template 'Time Profiler' --device booted --attach <app process name> --time-limit 20s --output /tmp/app.trace`, then `xcrun xctrace export --input /tmp/app.trace --toc` and export the time-profile table to read the heaviest stacks.
+- Metro / app logs for repeated renders or effects firing in a loop; count network calls the screen makes on mount.
+- Treat simulator numbers as relative (base vs. branch), not absolute device performance.
+
+**Code-level (always)**
+Unbounded loops or queries, missing pagination or limits, per-item work that could be done once, fetching data that isn't used, missing indexes in new migrations.
+
+Report numbers, not impressions, and say which tool produced each one. If you couldn't measure something, say what was missing.
 
 ## 4. Code quality
 
