@@ -74,7 +74,7 @@ Investigate (code, git history, Linear, Sentry, DB as needed) and answer directl
 
 ## 4. Finish (bug / feature / change)
 
-1. **Review.** Spawn one fresh subagent per touched repo with the diff against `origin/<base>` and the task description — not your reasoning — and ask it to find correctness bugs, missed cases and cross-repo contract mismatches. Fix what's real; note in the summary anything you chose not to fix and why.
+1. **Review.** Run the `review` skill on every touched repo. It runs the change, measures it and reviews the code; fix its blockers and should-fixes and re-run the affected checks. Note in the summary anything you chose not to fix and why.
 2. **Ship.** Use the `ship` skill to commit, push and open a PR to the base branch in **every repo touched**, cross-linked and linked to the Linear ticket.
 3. **Summary** to the user, short:
    - type and root cause (bugs) or what was built

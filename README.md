@@ -7,6 +7,7 @@ Tim stack: a small set of Claude Code skills for how we build, fix and ship acro
 | Skill | What it does |
 |---|---|
 | `/tstack:calda-mode <instructions or Linear ticket>` | Decides if it's a bug, feature, change or question, then drives it end to end. Bugs are reproduced locally and re-verified until fixed. Keeps the Linear ticket updated along the way. Finishes with a review and PRs in every repo touched. |
+| `/tstack:review` | Runs the change locally (backend + Supabase, web, iOS simulator), checks it works, measures how fast the changed paths are, and reviews the code for bugs, dead code and bad code. Also the last step of `calda-mode`. |
 | `/tstack:ship` | Commit, push and open cross-linked PRs in every repo with related changes. |
 | `/tstack:branches` | Audit branches and worktrees not merged into the base branch, recommend merge / keep / delete, and clean up after you confirm. |
 
