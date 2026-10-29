@@ -91,15 +91,26 @@ Restart Codex.
 
 **OpenCode**
 
-OpenCode has no skill marketplace, so clone the repo and link it into `~/.config/opencode`:
+OpenCode has no skill marketplace, so clone the repo and copy the OpenCode-optimized skills into `~/.config/opencode`:
 
 ```bash
 git clone https://github.com/timrekelj/pitcrew ~/.local/share/pitcrew
 ~/.local/share/pitcrew/opencode/install.sh
-opencode service restart
 ```
 
-The script symlinks each `skills/<name>` into `~/.config/opencode/skills/` and the `/pitcrew-*` commands from `opencode/commands/` into `~/.config/opencode/commands/`. It won't overwrite a file or folder that isn't a symlink; it prints `skip` instead (e.g. if you already have a skill called `review`). Use any clone path you like; the links point at it.
+The script **copies** (not symlinks) OpenCode-optimized versions from `opencode/` into `~/.config/opencode/`:
+- `opencode/skills/pitcrew-<name>/SKILL.md` → `~/.config/opencode/skills/` — enhanced with `metadata.opencode/autoinvoke` and OpenCode-specific subagent instructions
+- `opencode/commands/pitcrew-<name>.md` → `~/.config/opencode/commands/` — with `agent`, `subagent` frontmatter
+- `opencode/agents/pitcrew-*.md` → `~/.config/opencode/agents/` — custom subagents for explore and review
+
+The skills are prefixed with `pitcrew-` to avoid conflicts with OpenCode built-ins (e.g. `review`, `ship` are reserved names).
+
+**Global config:** Add these to `~/.config/opencode/opencode.json` for the full experience:
+- Permission presets for `git`, `npm`, `go`, `gh`, `supabase`, `psql`, `curl` (ask for `git push`, `gh pr create`)
+- `"formatter": true`
+- `"experimental": { "todo": true, "background_compaction": true }`
+
+**Project template:** Copy `opencode/templates/project-opencode.json` to your project root as `opencode.json` for project-specific permissions and instructions.
 
 ### 2. Connect the MCP servers
 
@@ -157,7 +168,7 @@ In a project repo, run `/pitcrew:branches` (Claude Code), `$branches` (Codex) or
 
 ## Updating
 
-Each tool runs an installed copy, not this repo (OpenCode runs your clone).
+Each tool runs an installed copy, not this repo (OpenCode runs your copied files).
 
 **Releasing a change**
 
@@ -168,7 +179,7 @@ Each tool runs an installed copy, not this repo (OpenCode runs your clone).
 
 - Claude Code: `claude plugin marketplace update pitcrew && claude plugin update pitcrew@pitcrew`, then restart. Or turn on auto-update: `/plugin` → Marketplaces → `pitcrew` → Enable auto-update.
 - Codex: `codex plugin marketplace upgrade pitcrew && codex plugin add pitcrew@pitcrew`, then restart.
-- OpenCode: `git -C ~/.local/share/pitcrew pull`, then `opencode service restart`. Re-run `opencode/install.sh` if a skill or command was added or renamed.
+- OpenCode: `git -C ~/.local/share/pitcrew pull`, then re-run `~/.local/share/pitcrew/opencode/install.sh` to copy the updated files.
 
 **Migrating from `tstack`**
 
@@ -182,11 +193,17 @@ The repo was renamed from `tstack` and `calda-mode` is now `drive`. Remove the o
 
 | Path | Used by |
 |---|---|
-| `skills/<name>/SKILL.md` | All three |
+| `skills/<name>/SKILL.md` | Claude Code, Codex (shared, portable frontmatter) |
 | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` | Claude Code |
 | `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json` | Codex |
-| `opencode/install.sh`, `opencode/commands/pitcrew-<name>.md` | OpenCode |
+| `opencode/skills/pitcrew-<name>/SKILL.md` | OpenCode (optimized, `pitcrew-` prefix) |
+| `opencode/commands/pitcrew-<name>.md` | OpenCode (with agent/subagent frontmatter) |
+| `opencode/agents/pitcrew-<name>.md` | OpenCode (custom subagents) |
+| `opencode/templates/project-opencode.json` | OpenCode (project config template) |
+| `opencode/install.sh` | OpenCode (copies files to `~/.config/opencode/`) |
 
-When you add a skill, add a matching `opencode/commands/pitcrew-<name>.md` that loads it.
+**For Claude Code / Codex:** Add a skill in `skills/<name>/SKILL.md`. It's shared across both.
 
-`argument-hint` in the skill frontmatter is Claude Code-only. `disable-model-invocation` (on `drive` and `branches`) is honoured by Claude Code and OpenCode, so the agent only runs those two when you ask for them. Codex ignores it and may start them on its own when a request matches.
+**For OpenCode:** Add an OpenCode-optimized skill in `opencode/skills/pitcrew-<name>/SKILL.md` with a matching command in `opencode/commands/pitcrew-<name>.md`. Run `opencode/install.sh` to copy it.
+
+`argument-hint` in the skill frontmatter is Claude Code-only. `disable-model-invocation` (on `drive` and `branches`) is honoured by Claude Code and Codex; OpenCode uses `metadata.opencode/autoinvoke: false` instead. Codex ignores `disable-model-invocation` and may start those skills on its own when a request matches.

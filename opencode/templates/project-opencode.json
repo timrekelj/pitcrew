@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "AGENTS.md",
+    "CONTRIBUTING.md",
+    "docs/guidelines/*.md"
+  ],
+  "permissions": [
+    { "action": "skill", "resource": "pitcrew-*", "effect": "allow" },
+    { "action": "skill", "resource": "*", "effect": "ask" },
+    { "action": "shell", "resource": "git status *", "effect": "allow" },
+    { "action": "shell", "resource": "git diff *", "effect": "allow" },
+    { "action": "shell", "resource": "git log *", "effect": "allow" },
+    { "action": "shell", "resource": "git branch *", "effect": "allow" },
+    { "action": "shell", "resource": "git fetch *", "effect": "allow" },
+    { "action": "shell", "resource": "git worktree *", "effect": "allow" },
+    { "action": "shell", "resource": "git add *", "effect": "allow" },
+    { "action": "shell", "resource": "git commit *", "effect": "allow" },
+    { "action": "shell", "resource": "git checkout *", "effect": "allow" },
+    { "action": "shell", "resource": "git switch *", "effect": "allow" },
+    { "action": "shell", "resource": "git pull *", "effect": "allow" },
+    { "action": "shell", "resource": "gh pr list *", "effect": "allow" },
+    { "action": "shell", "resource": "gh pr view *", "effect": "allow" },
+    { "action": "shell", "resource": "gh pr create *", "effect": "ask" },
+    { "action": "shell", "resource": "git push *", "effect": "ask" }
+  ],
+  "formatter": true,
+  "experimental": {
+    "todo": true
+  }
+}
