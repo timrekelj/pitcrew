@@ -29,18 +29,27 @@ Pick exactly one and state it in one line, with the reason:
 | **change** | No behavior change for users: refactor, cleanup, config, script, data/backfill. |
 | **question** | The user wants to understand something. No code changes. |
 
-If it's genuinely ambiguous, or the instructions miss something you can't infer from code (which repo, what the expected behavior is), ask before writing code. Otherwise proceed.
+If the type itself is unclear, add that to the questions in step 2.
+
+## 2. Clarify before starting
+
+Don't assume anything. Before branching, writing code or investigating, list everything you'd otherwise have to guess and that the input, the ticket, the designs, `AGENTS.md` and the code don't answer: scope and what's out of scope, which repos, the expected behavior, edge cases and error handling, UI states the designs don't show, data or migration impact, and what "done" looks like.
+
+- Ask them **all at once**, in one message, numbered, each with your recommended answer, and wait for the replies. Don't trickle questions out one by one.
+- Don't ask what you can find out yourself from the code, git history or the ticket — look it up instead.
+- If nothing is open, say so in one line and continue.
+- If a new question comes up mid-work that changes what you'd build, stop and ask it instead of picking an answer.
 
 Then create a todo list from the steps of that type's route below.
 
-## 2. Branch
+## 3. Branch
 
 For bug / feature / change, in every repo you will edit:
 - Start from the up-to-date base branch (`git fetch`, then branch from `origin/<base>`).
 - Branch name: `fix/…`, `feat/…` or `chore/…`, plus the Linear id if there is one (`fix/abc-123-short-name`).
 - If you're already on a feature branch for this work, stay on it.
 
-## 3. Routes
+## 4. Routes
 
 ### bug
 
@@ -74,7 +83,7 @@ For bug / feature / change, in every repo you will edit:
 
 Investigate (code, git history, Linear, Sentry, DB as needed) and answer directly, pointing at `file:line`. Say what you verified versus what you're inferring. No branch, no PR.
 
-## 4. Finish (bug / feature / change)
+## 5. Finish (bug / feature / change)
 
 1. **Review.** Run the `review` skill on every touched repo, passing along any Figma links. It runs the change, measures it and reviews the code; fix its blockers and should-fixes and re-run the affected checks. Note in the summary anything you chose not to fix and why.
 2. **Ship.** Use the `ship` skill to commit, push and open a PR to the base branch in **every repo touched**, cross-linked and linked to the Linear ticket.
@@ -101,6 +110,7 @@ Use the team's actual status names (look them up); if a status doesn't exist, sk
 
 ## Rules
 
+- Never fill a gap with an assumption: ask (see step 2).
 - Don't edit a sibling repo unless the task needs it; when it does, say so before you start there.
 - Never push to `development`, `staging`, `master`/`main` or `production` directly, and never run anything against a non-local database without asking.
 - Prefer deleting or reusing code over adding more.

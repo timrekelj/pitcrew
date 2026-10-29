@@ -14,7 +14,8 @@ Review a change the way a senior engineer would: run it, try it, measure it, the
 2. **Base branch:** `development` if the repo has it, otherwise `staging`.
 3. Per repo, collect `git diff origin/<base>...HEAD` and the intent: the Linear ticket, PR description, or what the user said. Review against the intent, not just the diff. Collect any Figma links from those too.
 4. Read each repo's `AGENTS.md` for how to run, test and seed it.
-5. **Start the code-quality review now** (step 4) as background subagents, one per repo, so it runs while you run and measure the change. Collect their results at step 4.
+5. **Clarify before starting.** Don't assume the intent or the scope. If anything is unclear — missing or vague intent (no ticket or PR description), expected behavior, which repos, flows or screens are in scope, what to focus on, which Figma frames apply, what local setup or seed data to use — ask all of it at once, in one numbered message with your recommended answers, and wait before running anything. Don't ask what you can find out from the code, the ticket or `AGENTS.md`. When called from `drive`, don't re-ask what was already settled there.
+6. **Start the code-quality review now** (step 4) as background subagents, one per repo, so it runs while you run and measure the change. Collect their results at step 4.
 
 ## 1. Run it
 

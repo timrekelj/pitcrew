@@ -9,6 +9,8 @@ disable-model-invocation: true
 
 Audit the current repo (or the repos given, or the current repo plus its siblings from `AGENTS.md` if the user asks for all).
 
+**Don't assume the scope.** If it's unclear which repos to audit or whether remote branches are included, ask once up front, together, before gathering.
+
 **Base branch:** `development` if the repo has it, otherwise `staging`. If neither exists, ask. Below, `<base>` means this.
 
 ## 1. Gather

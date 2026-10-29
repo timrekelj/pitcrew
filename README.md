@@ -30,16 +30,17 @@ PRs target `development`, or `staging` if a repo has no `development` branch.
 How `drive` runs a task:
 
 1. **Context:** reads the Linear ticket, any Figma frames (from the prompt or the ticket) and the repo's `AGENTS.md`; checks whether the work is already done.
-2. **Classify:** bug, feature, change or question. Asks if it's unclear.
-3. **Branch** from `development` (or `staging`).
-4. **Do the work:**
+2. **Classify:** bug, feature, change or question.
+3. **Clarify:** assumes nothing; asks all its open questions at once, with recommended answers, and waits before starting.
+4. **Branch** from `development` (or `staging`).
+5. **Do the work:**
    - bug: reproduce locally, find the root cause, fix, re-run the repro until it passes
    - feature: plan (waits for your OK on database changes), backend first, then clients, built to the Figma designs
    - change: refactor / script / data work, dry run first
    - question: answer with `file:line` references, no PR
-5. **Review** with `review`: runs it, compares with Figma, measures performance, checks code quality; fixes what it finds.
-6. **Ship** with `ship`: PRs in every repo touched.
-7. **Linear** is updated along the way: In Progress → repro / root cause comments → PR links → In Review.
+6. **Review** with `review`: runs it, compares with Figma, measures performance, checks code quality; fixes what it finds.
+7. **Ship** with `ship`: PRs in every repo touched.
+8. **Linear** is updated along the way: In Progress → repro / root cause comments → PR links → In Review.
 
 Broad code searches, the code-quality review and multi-repo branch audits run in subagents, so the main agent's context stays focused.
 

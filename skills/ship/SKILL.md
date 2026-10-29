@@ -14,6 +14,7 @@ Open PRs for the current work, in every repo it touches.
 
 - The current repo, plus any sibling repo listed in `AGENTS.md` that has uncommitted changes or a branch ahead of its base branch for this work.
 - List them and what's changed in each. If a sibling's changes look unrelated, ask before including it.
+- **Clarify before committing.** Don't assume. Collect everything unclear — which repos and files belong in this work, unrelated or suspicious changes, the Linear ticket if it isn't known, the merge order across repos, anything for the deploy notes — and ask it all at once, in one numbered message with your recommended answers, before the first commit. Don't ask what you can see in the diff, branch or ticket.
 
 ## 2. Per repo
 
