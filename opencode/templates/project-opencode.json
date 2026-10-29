@@ -25,6 +25,9 @@
     { "action": "shell", "resource": "git push *", "effect": "ask" }
   ],
   "formatter": true,
+  "worktree": {
+    "directory": "../worktrees"
+  },
   "experimental": {
     "todo": true
   }
